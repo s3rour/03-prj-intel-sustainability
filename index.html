@@ -1,17 +1,456 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Intel: Sustainability Through the Ages</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 CSS (LTR default; swapped to RTL by JS when needed) -->
+  <link id="bootstrap-css"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet" />
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet" />
+
+  <!-- Project stylesheet (timeline + custom overrides) -->
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ── CSS custom properties ─────────────────────────────── */
+    :root {
+      --intel-blue:       #0068B5;
+      --intel-blue-dark:  #00458C;
+      --intel-blue-light: #4FA3E0;
+      --accent:           #00C7FD;
+      --text-primary:     #0D1B2A;
+      --text-secondary:   #4A5568;
+      --surface:          #F0F6FC;
+      --surface-card:     #FFFFFF;
+      --border:           #D0E4F7;
+      --white:            #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      color: var(--text-primary);
+      background: var(--white);
+    }
+
+    /* ── HEADER ────────────────────────────────────────────── */
+    header {
+      position: relative;
+      background: linear-gradient(135deg, var(--intel-blue-dark) 0%, var(--intel-blue) 55%, var(--intel-blue-light) 100%);
+      overflow: hidden;
+      padding: 80px 40px 90px;
+      text-align: center;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 80% 20%, rgba(0,199,253,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, rgba(0,68,140,.4) 0%, transparent 70%);
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 60px;
+      background: var(--white);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    header > div { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+    header img {
+      height: 44px;
+      margin-bottom: 28px;
+      filter: brightness(0) invert(1);
+    }
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+    header p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.82);
+      line-height: 1.7;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── SCROLL HINT ───────────────────────────────────────── */
+    .scroll-hint {
+      text-align: center;
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      padding: 28px 20px 12px;
+    }
+    .scroll-hint span { opacity: .5; margin: 0 6px; }
+
+    /* ── TIMELINE SECTION ──────────────────────────────────── */
+    .timeline-section {
+      padding: 8px 0 56px;
+      position: relative;
+      overflow: hidden;
+    }
+    .timeline-section::before {
+      content: '';
+      position: absolute;
+      top: 46px;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--border) 5%, var(--border) 95%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .timeline-track {
+      display: flex;
+      gap: 24px;
+      padding: 12px 40px 28px;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: var(--intel-blue) var(--border);
+      cursor: grab;
+      user-select: none;
+      min-height: 380px;
+    }
+    .timeline-track::-webkit-scrollbar { height: 4px; }
+    .timeline-track::-webkit-scrollbar-track { background: var(--border); border-radius: 2px; }
+    .timeline-track::-webkit-scrollbar-thumb { background: var(--intel-blue); border-radius: 2px; }
+    .timeline-track.is-dragging { cursor: grabbing; }
+
+    /* ── CARD ──────────────────────────────────────────────── */
+    /* Override Bootstrap's .card styles for our timeline cards */
+    .timeline-track .card {
+      flex: 0 0 clamp(200px, 80vw, 240px);
+      min-width: 0;
+      background: var(--surface-card);
+      border: 1px solid var(--border) !important;
+      border-radius: 16px !important;
+      padding: 0 0 24px;
+      scroll-snap-align: start;
+      position: relative;
+      overflow: hidden;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease;
+    }
+    .timeline-track .card::before {
+      content: '';
+      position: absolute;
+      top: -48px; left: 50%;
+      transform: translateX(-50%);
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--intel-blue);
+      border: 3px solid var(--white);
+      box-shadow: 0 0 0 2px var(--border);
+      pointer-events: none;
+    }
+    .timeline-track .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(0,68,140,.15) !important;
+    }
+    .timeline-track .card:hover .card-detail { opacity: 1; transform: translateY(0); }
+
+    .card-year {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      color: var(--white);
+      background: var(--intel-blue);
+      padding: 14px 20px 12px;
+      letter-spacing: -.02em;
+    }
+    .timeline-track .card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--intel-blue-dark);
+      padding: 14px 20px 6px;
+    }
+    .card-img {
+      width: 100%;
+      height: 110px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .timeline-track .card > p {
+      font-size: .84rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      padding: 14px 20px 0;
+    }
+    .card-detail {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(0,68,140,.96) 0%, rgba(0,104,181,.94) 100%);
+      color: var(--white);
+      padding: 24px 20px;
+      font-size: .82rem;
+      line-height: 1.65;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .24s ease, transform .24s ease;
+    }
+    .card-detail p  { color: rgba(255,255,255,.9); font-size: .82rem; line-height: 1.65; }
+    .card-detail strong {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    /* ── THREE-COLUMN (Bootstrap grid) ────────────────────── */
+    .pillars-section { background: var(--surface); padding: 72px 0; }
+    .pillars-section .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--intel-blue-dark);
+      letter-spacing: -.02em;
+      margin-bottom: 48px;
+    }
+    .pillar-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 28px 32px;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .25s ease, transform .25s ease;
+    }
+    .pillar-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--intel-blue), var(--accent));
+    }
+    .pillar-card:hover {
+      box-shadow: 0 12px 36px rgba(0,68,140,.12);
+      transform: translateY(-4px);
+    }
+    .pillar-icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      color: var(--intel-blue);
+      transition: background .2s;
+    }
+    .pillar-card:hover .pillar-icon { background: var(--intel-blue); color: var(--white); }
+    .pillar-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--intel-blue-dark);
+      margin-bottom: 12px;
+      letter-spacing: -.01em;
+    }
+    .pillar-card p {
+      font-size: .9rem;
+      line-height: 1.72;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .pillar-card .learn-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--intel-blue);
+      color: var(--white) !important;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 6px;
+      transition: background .2s ease, gap .2s ease;
+    }
+    .pillar-card .learn-more:hover { background: var(--intel-blue-dark); gap: 10px; }
+
+    /* ── FAQ ACCORDION ─────────────────────────────────────── */
+    .faq-section { padding: 72px 0; background: var(--white); }
+    .faq-section .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--intel-blue-dark);
+      letter-spacing: -.02em;
+      margin-bottom: 40px;
+    }
+    .faq-section .accordion-button {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      color: var(--intel-blue-dark);
+      background: var(--surface);
+    }
+    .faq-section .accordion-button:not(.collapsed) {
+      background: var(--intel-blue);
+      color: var(--white);
+      box-shadow: none;
+    }
+    .faq-section .accordion-button::after {
+      /* re-tint Bootstrap's chevron to white when open */
+      filter: none;
+    }
+    .faq-section .accordion-button:not(.collapsed)::after {
+      filter: brightness(0) invert(1);
+    }
+    .faq-section .accordion-body {
+      font-size: .95rem;
+      line-height: 1.72;
+      color: var(--text-secondary);
+      background: var(--white);
+    }
+
+    /* ── NEWSLETTER ────────────────────────────────────────── */
+    .newsletter-section {
+      background: linear-gradient(135deg, var(--intel-blue-dark), var(--intel-blue));
+      padding: 80px 0;
+      color: var(--white);
+    }
+    .newsletter-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+    .newsletter-section .sub-text { color: rgba(255,255,255,.78); font-size: .95rem; margin-bottom: 32px; }
+    .newsletter-section .form-control {
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.3);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .newsletter-section .form-control::placeholder { color: rgba(255,255,255,.55); }
+    .newsletter-section .form-control:focus {
+      background: rgba(255,255,255,.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,199,253,.25);
+      color: var(--white);
+    }
+    .newsletter-section label { color: rgba(255,255,255,.85); font-size: .85rem; margin-bottom: 6px; }
+    .newsletter-section .btn-subscribe {
+      background: var(--accent);
+      color: var(--intel-blue-dark);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 32px;
+      width: 100%;
+      transition: opacity .2s, transform .15s;
+    }
+    .newsletter-section .btn-subscribe:hover { opacity: .9; transform: translateY(-1px); }
+    .newsletter-section .form-check-label { color: rgba(255,255,255,.7); font-size: .82rem; }
+    .newsletter-section .privacy-note { font-size: .75rem; color: rgba(255,255,255,.5); margin-top: 12px; }
+    /* Accessible error styling */
+    .newsletter-section .invalid-feedback { color: #ffd6d6; }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    .site-footer { background: var(--text-primary); color: rgba(255,255,255,.55); padding: 56px 0 0; }
+    .site-footer .footer-brand img { height: 36px; filter: brightness(0) invert(1); margin-bottom: 16px; }
+    .site-footer .footer-brand p { font-size: .85rem; line-height: 1.65; max-width: 260px; }
+    .site-footer h5 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      color: var(--white);
+      font-size: .88rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+    }
+    .site-footer ul { list-style: none; padding: 0; margin: 0; }
+    .site-footer ul li { margin-bottom: 10px; }
+    .site-footer a {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: .85rem;
+      transition: color .2s;
+    }
+    .site-footer a:hover { color: var(--accent); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.1);
+      padding: 20px 0;
+      margin-top: 48px;
+      font-size: .75rem;
+      color: rgba(255,255,255,.4);
+    }
+
+    /* ── RTL OVERRIDES ─────────────────────────────────────── */
+    [dir="rtl"] .pillar-card::before,
+    [dir="rtl"] .timeline-track .card::before { left: auto; right: 50%; transform: translateX(50%); }
+    [dir="rtl"] .learn-more i { transform: scaleX(-1); }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      header { padding: 60px 24px 76px; }
+      .scroll-hint { padding: 20px 16px 8px; }
+      .timeline-track { padding: 10px 20px 20px; gap: 16px; scrollbar-width: none; min-height: 0; }
+      .timeline-track::-webkit-scrollbar { display: none; }
+      .timeline-track .card { flex: 0 0 clamp(200px, 75vw, 260px); }
+      .timeline-track .card:hover { transform: none; box-shadow: none !important; }
+      .timeline-track .card.is-open .card-detail { opacity: 1; transform: translateY(0); }
+      .timeline-section::before { display: none; }
+      .timeline-track .card::before { display: none; }
+      .pillars-section { padding: 52px 0; }
+      .faq-section { padding: 52px 0; }
+      .newsletter-section { padding: 56px 0; }
+    }
+    @media (max-width: 380px) {
+      header h1 { font-size: 1.7rem; }
+      .timeline-track .card { flex: 0 0 85vw; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Hero Section -->
+  <!-- ═══════════════════════════════════════════════════════
+       HEADER / HERO
+  ════════════════════════════════════════════════════════ -->
   <header>
     <div>
-      <img src="img/intel-header-logo.svg" alt="Intel Logo" />
+      <img src="img/intel-header-logo.svg" alt="Intel Corporation logo" />
       <h1>Sustainability Through the Ages</h1>
       <p>
         Explore Intel's journey through time, discovering how our commitment
@@ -21,151 +460,555 @@
     </div>
   </header>
 
-  <p>Scroll to view timeline &nbsp;|&nbsp; Hover over cards to learn more</p>
+  <!-- Scroll hint -->
+  <p class="scroll-hint" id="scroll-hint-text">
+    Scroll to view timeline <span aria-hidden="true">|</span> Hover over cards to learn more
+  </p>
 
-  <!-- Timeline Cards -->
-  <section>
+  <!-- ═══════════════════════════════════════════════════════
+       TIMELINE  (flexbox — untouched per instructions)
+  ════════════════════════════════════════════════════════ -->
+  <section class="timeline-section" aria-label="Intel history timeline">
+    <div class="timeline-track" id="track" role="list">
 
-    <!-- Card 1: 1968 -->
-    <div data-detail="Founded by Robert Noyce and Gordon Moore, Intel set out to build semiconductor memory products — a mission that would spark decades of computing breakthroughs and eventually lead to a company-wide commitment to responsible manufacturing.">
-      <h2>1968</h2>
-      <h3>Intel Founded</h3>
-      <div class="card-img">
-        <img src="img/1968.png" alt="Intel founded in 1968" onerror="this.style.display='none'" />
+      <!-- Card 1: 1968 -->
+      <div class="card" role="listitem"
+           data-detail="Founded by Robert Noyce and Gordon Moore, Intel set out to build semiconductor memory products — a mission that would spark decades of computing breakthroughs and eventually lead to a company-wide commitment to responsible manufacturing.">
+        <div class="card-year" aria-label="Year 1968">1968</div>
+        <h3>Intel Founded</h3>
+        <div class="card-img">
+          <img src="img/1968.png" alt="Historic photo of Intel's founding in 1968" onerror="this.style.display='none'" />
+        </div>
+        <p>Robert Noyce and Gordon Moore rename NM Electronics to Intel Corporation, laying the foundation for decades of technological innovation.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>1968 — Intel Founded</strong>
+          <p>Founded by Robert Noyce and Gordon Moore, Intel set out to build semiconductor memory products — sparking decades of breakthroughs and a company-wide commitment to responsible manufacturing.</p>
+        </div>
       </div>
-      <p>
-        Robert Noyce and Gordon Moore rename NM Electronics to Intel Corporation,
-        laying the foundation for decades of technological innovation.
-      </p>
-    </div>
 
-    <!-- Card 2: 1971 -->
-    <div data-detail="The 4004 packed 2,300 transistors onto a chip the size of a fingernail. This invention democratized computing power and set the trajectory for the miniaturization that makes today's energy-efficient chips possible.">
-      <h2>1971</h2>
-      <h3>First Microprocessor</h3>
-      <div class="card-img">
-        <img src="img/1971.png" alt="Intel 4004 microprocessor" onerror="this.style.display='none'" />
+      <!-- Card 2: 1971 -->
+      <div class="card" role="listitem"
+           data-detail="The 4004 packed 2,300 transistors onto a chip the size of a fingernail. This invention democratized computing power and set the trajectory for the miniaturization that makes today's energy-efficient chips possible.">
+        <div class="card-year" aria-label="Year 1971">1971</div>
+        <h3>First Microprocessor</h3>
+        <div class="card-img">
+          <img src="img/1971.png" alt="The Intel 4004, the world's first commercial microprocessor" onerror="this.style.display='none'" />
+        </div>
+        <p>Intel debuts the 4004, the world's first commercial microprocessor, igniting the microprocessor revolution and propelling the future of computing.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>1971 — First Microprocessor</strong>
+          <p>The 4004 packed 2,300 transistors onto a chip the size of a fingernail — setting the trajectory for the miniaturization that makes today's energy-efficient chips possible.</p>
+        </div>
       </div>
-      <p>
-        Intel debuts the 4004, the world's first commercial microprocessor,
-        igniting the microprocessor revolution and propelling the future of computing.
-      </p>
-    </div>
 
-    <!-- Card 3: 1978 -->
-    <div data-detail="The 8086's x86 instruction set became the backbone of modern PCs and servers. Its lasting influence means that efficiency improvements in x86 chips have compounding effects on global energy consumption to this day.">
-      <h2>1978</h2>
-      <h3>8086 Processor</h3>
-      <div class="card-img">
-        <img src="img/1978.png" alt="Intel 8086 processor" onerror="this.style.display='none'" />
+      <!-- Card 3: 1978 -->
+      <div class="card" role="listitem"
+           data-detail="The 8086's x86 instruction set became the backbone of modern PCs and servers. Its lasting influence means that efficiency improvements in x86 chips have compounding effects on global energy consumption to this day.">
+        <div class="card-year" aria-label="Year 1978">1978</div>
+        <h3>8086 Processor</h3>
+        <div class="card-img">
+          <img src="img/1978.png" alt="Intel 8086 processor chip" onerror="this.style.display='none'" />
+        </div>
+        <p>Launch of the 8086 processor, establishing the x86 architecture that drives countless PCs and servers in the modern era.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>1978 — 8086 Processor</strong>
+          <p>The 8086's x86 instruction set became the backbone of modern PCs and servers. Efficiency improvements in x86 chips have compounding effects on global energy consumption to this day.</p>
+        </div>
       </div>
-      <p>
-        Launch of the 8086 processor, establishing the x86 architecture
-        that drives countless PCs and servers in the modern era.
-      </p>
-    </div>
 
-    <!-- Card 4: 1985 -->
-    <div data-detail="32-bit processing unlocked true multitasking for personal computers. More performance per watt became a guiding principle that Intel engineers carried into every subsequent generation of chip design.">
-      <h2>1985</h2>
-      <h3>386 Processor</h3>
-      <div class="card-img">
-        <img src="img/1985.png" alt="Intel 386 processor" onerror="this.style.display='none'" />
+      <!-- Card 4: 1985 -->
+      <div class="card" role="listitem"
+           data-detail="32-bit processing unlocked true multitasking for personal computers. More performance per watt became a guiding principle that Intel engineers carried into every subsequent generation of chip design.">
+        <div class="card-year" aria-label="Year 1985">1985</div>
+        <h3>386 Processor</h3>
+        <div class="card-img">
+          <img src="img/1985.png" alt="Intel 386 processor chip" onerror="this.style.display='none'" />
+        </div>
+        <p>Intel introduces the 386 processor with 32-bit architecture, ushering in a new era of performance and multitasking for personal computers.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>1985 — 386 Processor</strong>
+          <p>32-bit processing unlocked true multitasking. More performance per watt became a guiding principle carried into every subsequent generation of chip design.</p>
+        </div>
       </div>
-      <p>
-        Intel introduces the 386 processor with 32-bit architecture,
-        ushering in a new era of performance and multitasking for personal computers.
-      </p>
-    </div>
 
-    <!-- Card 5: 2006 -->
-    <div data-detail="Recognizing 2006 as a turning point, Intel launched aggressive investments in chemical abatement systems, on-site renewable energy, and cleaner manufacturing chemistries — beginning a decade-long downward trend in emissions.">
-      <h2>2006</h2>
-      <h3>Peak GHG Emissions</h3>
-      <div class="card-img">
-        <img src="img/2006.png" alt="GHG emissions chart" onerror="this.style.display='none'" />
+      <!-- Card 5: 2006 -->
+      <div class="card" role="listitem"
+           data-detail="Recognizing 2006 as a turning point, Intel launched aggressive investments in chemical abatement systems, on-site renewable energy, and cleaner manufacturing chemistries — beginning a decade-long downward trend in emissions.">
+        <div class="card-year" aria-label="Year 2006">2006</div>
+        <h3>Peak GHG Emissions</h3>
+        <div class="card-img">
+          <img src="img/2006.png" alt="Graph showing Intel's peak greenhouse gas emissions in 2006" onerror="this.style.display='none'" />
+        </div>
+        <p>This year marks Intel's highest annual greenhouse gas emissions for operations. Intel begins investing heavily in abatement and renewables to reverse the trend.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>2006 — Peak GHG Emissions</strong>
+          <p>Recognizing 2006 as a turning point, Intel launched aggressive investments in chemical abatement, on-site renewable energy, and cleaner manufacturing — beginning a decade-long downward emissions trend.</p>
+        </div>
       </div>
-      <p>
-        This year marks Intel's highest annual greenhouse gas emissions for
-        operations. Intel begins investing heavily in abatement and renewables
-        to reverse the trend.
-      </p>
-    </div>
 
-    <!-- Card 6: 2020 -->
-    <div data-detail="RISE stands for Responsible, Inclusive, Sustainable, Enabling. The 2030 goals include achieving net-positive water use, reaching zero total waste to landfill, and conserving more energy than operations consume.">
-      <h2>2020</h2>
-      <h3>RISE Strategy</h3>
-      <div class="card-img">
-        <img src="img/2020.png" alt="Intel RISE strategy" onerror="this.style.display='none'" />
+      <!-- Card 6: 2020 -->
+      <div class="card" role="listitem"
+           data-detail="RISE stands for Responsible, Inclusive, Sustainable, Enabling. The 2030 goals include achieving net-positive water use, reaching zero total waste to landfill, and conserving more energy than operations consume.">
+        <div class="card-year" aria-label="Year 2020">2020</div>
+        <h3>RISE Strategy</h3>
+        <div class="card-img">
+          <img src="img/2020.png" alt="Intel RISE strategy launch graphic" onerror="this.style.display='none'" />
+        </div>
+        <p>Intel launches its RISE strategy and 2030 goals, driving industry-wide progress on climate action, water stewardship, and waste reduction.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>2020 — RISE Strategy</strong>
+          <p>RISE: Responsible, Inclusive, Sustainable, Enabling. Goals include net-positive water use, zero total waste to landfill, and conserving more energy than operations consume.</p>
+        </div>
       </div>
-      <p>
-        Intel launches its RISE strategy and 2030 goals, driving industry-wide
-        progress on climate action, water stewardship, and waste reduction.
-      </p>
-    </div>
 
-    <!-- Card 7: 2022 -->
-    <div data-detail="The net-zero pledge covers Scope 1 (direct) and Scope 2 (purchased energy) emissions across all global facilities. Intel also committed to a 10× improvement in energy efficiency of client and server platforms by 2030.">
-      <h2>2022</h2>
-      <h3>Net-Zero By 2040</h3>
-      <div class="card-img">
-        <img src="img/2022.png" alt="Net-zero commitment" onerror="this.style.display='none'" />
+      <!-- Card 7: 2022 -->
+      <div class="card" role="listitem"
+           data-detail="The net-zero pledge covers Scope 1 (direct) and Scope 2 (purchased energy) emissions across all global facilities. Intel also committed to a 10× improvement in energy efficiency of client and server platforms by 2030.">
+        <div class="card-year" aria-label="Year 2022">2022</div>
+        <h3>Net-Zero By 2040</h3>
+        <div class="card-img">
+          <img src="img/2022.png" alt="Visual representing Intel's net-zero emissions commitment" onerror="this.style.display='none'" />
+        </div>
+        <p>Intel announces its commitment to achieve net-zero greenhouse gas emissions (Scope 1 and 2) across global operations by 2040.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>2022 — Net-Zero By 2040</strong>
+          <p>The pledge covers Scope 1 and Scope 2 emissions across all global facilities. Intel also committed to a 10× improvement in energy efficiency of client and server platforms by 2030.</p>
+        </div>
       </div>
-      <p>
-        Intel announces its commitment to achieve net-zero greenhouse gas
-        emissions (Scope 1 and 2) across global operations by 2040.
-      </p>
-    </div>
 
-    <!-- Card 8: 2023 -->
-    <div data-detail="Reaching 99% renewable electricity worldwide, Intel sourced clean power through a mix of direct renewable energy contracts, green tariffs, and renewable energy certificates across its manufacturing sites globally.">
-      <h2>2023</h2>
-      <h3>Renewable Electricity</h3>
-      <div class="card-img">
-        <img src="img/2023.png" alt="Renewable energy" onerror="this.style.display='none'" />
+      <!-- Card 8: 2023 -->
+      <div class="card" role="listitem"
+           data-detail="Reaching 99% renewable electricity worldwide, Intel sourced clean power through a mix of direct renewable energy contracts, green tariffs, and renewable energy certificates across its manufacturing sites globally.">
+        <div class="card-year" aria-label="Year 2023">2023</div>
+        <h3>Renewable Electricity</h3>
+        <div class="card-img">
+          <img src="img/2023.png" alt="Solar panels representing Intel's 99% renewable electricity achievement" onerror="this.style.display='none'" />
+        </div>
+        <p>The company achieves 99% renewable electricity usage worldwide, helping to drastically lower carbon emissions and driving progress toward Intel's long-term sustainability goals.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>2023 — Renewable Electricity</strong>
+          <p>Intel sourced clean power through direct renewable energy contracts, green tariffs, and renewable energy certificates across manufacturing sites globally.</p>
+        </div>
       </div>
-      <p>
-        The company achieves 99% renewable electricity usage worldwide, helping
-        to drastically lower carbon emissions and driving progress toward
-        Intel's long-term sustainability goals.
-      </p>
-    </div>
 
-    <!-- Card 9: 2024 -->
-    <div data-detail="Intel's inaugural Sustainability Summit brought together hundreds of suppliers and policymakers to align on shared emissions-reduction targets, responsible mineral sourcing, and circular-economy practices for semiconductor equipment.">
-      <h2>2024</h2>
-      <h3>Sustainability Summit</h3>
-      <div class="card-img">
-        <img src="img/2024.png" alt="Intel Sustainability Summit" onerror="this.style.display='none'" />
+      <!-- Card 9: 2024 -->
+      <div class="card" role="listitem"
+           data-detail="Intel's inaugural Sustainability Summit brought together hundreds of suppliers and policymakers to align on shared emissions-reduction targets, responsible mineral sourcing, and circular-economy practices for semiconductor equipment.">
+        <div class="card-year" aria-label="Year 2024">2024</div>
+        <h3>Sustainability Summit</h3>
+        <div class="card-img">
+          <img src="img/2024.png" alt="Intel Sustainability Summit 2024 event photo" onerror="this.style.display='none'" />
+        </div>
+        <p>Intel hosts its first Sustainability Summit, uniting suppliers, government officials, and industry leaders to collaborate on next-generation sustainable semiconductor manufacturing.</p>
+        <div class="card-detail" aria-hidden="true">
+          <strong>2024 — Sustainability Summit</strong>
+          <p>Hundreds of suppliers and policymakers aligned on shared emissions-reduction targets, responsible mineral sourcing, and circular-economy practices for semiconductor equipment.</p>
+        </div>
       </div>
-      <p>
-        Intel hosts its first Sustainability Summit, uniting suppliers,
-        government officials, and industry leaders to collaborate on
-        next-generation sustainable semiconductor manufacturing.
-      </p>
-    </div>
 
+    </div><!-- /.timeline-track -->
+  </section><!-- /.timeline-section -->
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       THREE-COLUMN SECTION  (Bootstrap grid)
+       col-12 on mobile → col-md-4 on tablet+ (3-up)
+  ════════════════════════════════════════════════════════ -->
+  <section class="pillars-section" aria-labelledby="pillars-heading">
+    <div class="container">
+      <h2 class="section-title text-center" id="pillars-heading">Our Sustainability Pillars</h2>
+
+      <!-- Bootstrap row: stacks to 1 col on xs/sm, 3 cols on md+ -->
+      <div class="row g-4">
+
+        <!-- Column 1: RISE Strategy -->
+        <div class="col-12 col-md-4">
+          <div class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">
+              <i class="bi bi-recycle"></i>
+            </div>
+            <h2>RISE Strategy</h2>
+            <p>Under its RISE (Responsible, Inclusive, Sustainable, Enabling) strategy, Intel sets ambitious 2030 goals, including driving industry-wide progress on climate action, water stewardship, and waste reduction.</p>
+            <a href="#" class="learn-more" aria-label="Learn more about Intel's RISE Strategy">
+              Learn More <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Commitment -->
+        <div class="col-12 col-md-4">
+          <div class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">
+              <i class="bi bi-bullseye"></i>
+            </div>
+            <h2>Commitment</h2>
+            <p>In 2022, Intel pledged to achieve net-zero greenhouse gas emissions (Scope 1 and 2) by 2040. This commitment builds on decades of environmental initiatives and partnerships across the semiconductor industry.</p>
+            <a href="#" class="learn-more" aria-label="Learn more about Intel's net-zero commitment">
+              Learn More <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 3: Water & Waste -->
+        <div class="col-12 col-md-4">
+          <div class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">
+              <i class="bi bi-droplet-half"></i>
+            </div>
+            <h2>Water &amp; Waste</h2>
+            <p>Intel conserves billions of gallons of water annually and collaborates with local communities to restore watersheds. Intel also upcycles and recycles materials to reduce waste and advance a circular economy.</p>
+            <a href="#" class="learn-more" aria-label="Learn more about Intel's water and waste initiatives">
+              Learn More <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /.row -->
+    </div><!-- /.container -->
   </section>
 
-  <!-- Drag-to-scroll JS (desktop UX enhancement) -->
-  <script>
-    const slider = document.querySelector('section');
-    let isDown = false, startX, scrollLeft;
 
-    slider.addEventListener('mousedown', e => {
-      isDown = true;
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
-    slider.addEventListener('mouseleave', () => isDown = false);
-    slider.addEventListener('mouseup',    () => isDown = false);
-    slider.addEventListener('mousemove', e => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      slider.scrollLeft = scrollLeft - (x - startX) * 1.4;
-    });
+  <!-- ═══════════════════════════════════════════════════════
+       FAQ ACCORDION  (Bootstrap — extra credit)
+  ════════════════════════════════════════════════════════ -->
+  <section class="faq-section" aria-labelledby="faq-heading">
+    <div class="container">
+      <h2 class="section-title text-center" id="faq-heading">Frequently Asked Questions</h2>
+
+      <div class="accordion" id="faqAccordion" style="max-width:760px; margin:0 auto;">
+
+        <div class="accordion-item border-0 mb-3 rounded-3 overflow-hidden">
+          <h3 class="accordion-header" id="faqH1">
+            <button class="accordion-button collapsed rounded-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#faqC1"
+                    aria-expanded="false" aria-controls="faqC1">
+              What is Intel's net-zero commitment?
+            </button>
+          </h3>
+          <div id="faqC1" class="accordion-collapse collapse"
+               aria-labelledby="faqH1" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              Intel has committed to achieving net-zero greenhouse gas emissions (Scope 1 and 2)
+              across all global operations by 2040, building on decades of environmental initiatives
+              and industry partnerships.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-0 mb-3 rounded-3 overflow-hidden">
+          <h3 class="accordion-header" id="faqH2">
+            <button class="accordion-button collapsed rounded-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#faqC2"
+                    aria-expanded="false" aria-controls="faqC2">
+              How does Intel achieve 99% renewable electricity?
+            </button>
+          </h3>
+          <div id="faqC2" class="accordion-collapse collapse"
+               aria-labelledby="faqH2" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              Intel sources clean power through a mix of direct renewable energy contracts, green
+              tariffs, and renewable energy certificates across all of its manufacturing sites globally.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-0 mb-3 rounded-3 overflow-hidden">
+          <h3 class="accordion-header" id="faqH3">
+            <button class="accordion-button collapsed rounded-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#faqC3"
+                    aria-expanded="false" aria-controls="faqC3">
+              What do the letters in RISE stand for?
+            </button>
+          </h3>
+          <div id="faqC3" class="accordion-collapse collapse"
+               aria-labelledby="faqH3" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              RISE stands for <strong>Responsible, Inclusive, Sustainable, Enabling</strong>. The
+              framework guides Intel's 2030 goals, which include net-positive water use, zero total
+              waste to landfill, and conserving more energy than operations consume.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-0 mb-3 rounded-3 overflow-hidden">
+          <h3 class="accordion-header" id="faqH4">
+            <button class="accordion-button collapsed rounded-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#faqC4"
+                    aria-expanded="false" aria-controls="faqC4">
+              How is Intel reducing water consumption?
+            </button>
+          </h3>
+          <div id="faqC4" class="accordion-collapse collapse"
+               aria-labelledby="faqH4" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              Intel conserves billions of gallons of water annually through innovative water
+              management practices and collaborates with local communities to restore watersheds,
+              working toward net-positive water use by 2030.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /#faqAccordion -->
+    </div><!-- /.container -->
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       NEWSLETTER FORM  (Bootstrap — accessible)
+  ════════════════════════════════════════════════════════ -->
+  <section class="newsletter-section" aria-labelledby="newsletter-heading">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-7 text-center">
+          <h2 id="newsletter-heading">Subscribe to our Newsletter</h2>
+          <p class="sub-text">Stay up to date with Intel's latest sustainability milestones and initiatives.</p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <form id="newsletter-form" novalidate aria-label="Newsletter subscription form">
+
+            <!-- Name -->
+            <div class="mb-3">
+              <label for="sub-name" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="sub-name" name="name"
+                     placeholder="Jane Smith"
+                     autocomplete="name"
+                     required
+                     aria-required="true"
+                     aria-describedby="name-error" />
+              <div id="name-error" class="invalid-feedback" role="alert">
+                Please enter your full name.
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="sub-email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="sub-email" name="email"
+                     placeholder="jane@example.com"
+                     autocomplete="email"
+                     required
+                     aria-required="true"
+                     aria-describedby="email-error" />
+              <div id="email-error" class="invalid-feedback" role="alert">
+                Please enter a valid email address.
+              </div>
+            </div>
+
+            <!-- Consent checkbox -->
+            <div class="mb-4 form-check">
+              <input type="checkbox" class="form-check-input" id="sub-consent"
+                     required
+                     aria-required="true"
+                     aria-describedby="consent-error" />
+              <label class="form-check-label" for="sub-consent">
+                I agree to receive sustainability updates from Intel.
+              </label>
+              <div id="consent-error" class="invalid-feedback" role="alert">
+                You must agree before subscribing.
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-subscribe">
+              <i class="bi bi-send me-2" aria-hidden="true"></i>Subscribe
+            </button>
+
+            <p class="privacy-note mt-3">
+              <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+              We respect your privacy. Unsubscribe at any time.
+            </p>
+
+          </form>
+
+          <!-- Success message (hidden until form submits) -->
+          <div id="form-success" class="alert alert-success mt-4 d-none" role="alert" aria-live="polite">
+            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+            Thanks for subscribing! You'll hear from us soon.
+          </div>
+        </div>
+      </div>
+    </div><!-- /.container -->
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       FOOTER  (Bootstrap grid)
+  ════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" aria-label="Site footer">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- Brand column -->
+        <div class="col-12 col-md-4 footer-brand">
+          <img src="img/intel-header-logo.svg" alt="Intel Corporation" />
+          <p>Committed to responsible, inclusive, sustainable, and enabling technology for a better world.</p>
+        </div>
+
+        <!-- Links: Company -->
+        <div class="col-6 col-md-2">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#">About Intel</a></li>
+            <li><a href="#">Newsroom</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Investor Relations</a></li>
+          </ul>
+        </div>
+
+        <!-- Links: Legal -->
+        <div class="col-6 col-md-2">
+          <h5>Legal</h5>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Cookie Settings</a></li>
+            <li><a href="#">Accessibility</a></li>
+          </ul>
+        </div>
+
+        <!-- Links: Connect -->
+        <div class="col-6 col-md-2">
+          <h5>Connect</h5>
+          <ul>
+            <li><a href="#" aria-label="Intel on Twitter / X"><i class="bi bi-twitter-x me-2" aria-hidden="true"></i>Twitter / X</a></li>
+            <li><a href="#" aria-label="Intel on LinkedIn"><i class="bi bi-linkedin me-2" aria-hidden="true"></i>LinkedIn</a></li>
+            <li><a href="#" aria-label="Intel on YouTube"><i class="bi bi-youtube me-2" aria-hidden="true"></i>YouTube</a></li>
+            <li><a href="#" aria-label="Intel on Facebook"><i class="bi bi-facebook me-2" aria-hidden="true"></i>Facebook</a></li>
+          </ul>
+        </div>
+
+        <!-- Links: Support -->
+        <div class="col-6 col-md-2">
+          <h5>Support</h5>
+          <ul>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Give Feedback</a></li>
+            <li><a href="#">Report an Issue</a></li>
+            <li><a href="#">Sitemap</a></li>
+          </ul>
+        </div>
+
+      </div><!-- /.row -->
+
+      <div class="footer-bottom text-center">
+        &copy; 2024 Intel Corporation. All rights reserved.
+        &nbsp;&bull;&nbsp;
+        <a href="#">Privacy</a> &nbsp;&bull;&nbsp;
+        <a href="#">Terms</a> &nbsp;&bull;&nbsp;
+        <a href="#">Cookies</a>
+      </div>
+    </div><!-- /.container -->
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════════════════════════ -->
+
+  <!-- Bootstrap JS (required for Accordion) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  // ─────────────────────────────────────────────────────────
+  // 1. DRAG-TO-SCROLL  (desktop mouse)
+  // ─────────────────────────────────────────────────────────
+  const track = document.getElementById('track');
+  let isDown = false, startX, scrollLeft;
+
+  track.addEventListener('mousedown', e => {
+    isDown = true;
+    track.classList.add('is-dragging');
+    startX    = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+  track.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('is-dragging'); });
+  track.addEventListener('mouseup',    () => { isDown = false; track.classList.remove('is-dragging'); });
+  track.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // 2. TAP-TO-REVEAL  (touch / mobile)
+  // ─────────────────────────────────────────────────────────
+  let touchStartX = 0, touchStartY = 0;
+  track.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  track.addEventListener('touchend', e => {
+    const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    if (dx < 10 && dy < 10) {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      document.querySelectorAll('.card.is-open').forEach(c => { if (c !== card) c.classList.remove('is-open'); });
+      card.classList.toggle('is-open');
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!e.target.closest('.card'))
+      document.querySelectorAll('.card.is-open').forEach(c => c.classList.remove('is-open'));
+  }, { passive: true });
+
+  // Update hint text on touch devices
+  if (window.matchMedia('(pointer: coarse)').matches)
+    document.getElementById('scroll-hint-text').textContent = 'Swipe to view timeline  |  Tap cards to learn more';
+
+  // ─────────────────────────────────────────────────────────
+  // 3. NEWSLETTER FORM  (Bootstrap validation pattern)
+  // ─────────────────────────────────────────────────────────
+  document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!this.checkValidity()) {
+      this.classList.add('was-validated');
+      return;
+    }
+    // Success state
+    this.classList.add('d-none');
+    document.getElementById('form-success').classList.remove('d-none');
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // 4. RTL AUTO-DETECTION  (extra credit)
+  //    Detects language changes (including Google Translate)
+  //    and swaps between Bootstrap LTR and RTL stylesheets.
+  // ─────────────────────────────────────────────────────────
+  const RTL_LANGS = new Set(['ar','he','fa','ur','yi','ji','ug','dv','ks','ku','ps','sd','ckb']);
+
+  const BOOTSTRAP_LTR = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';
+  const BOOTSTRAP_RTL = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css';
+
+  function applyDirectionality() {
+    const lang    = document.documentElement.lang || navigator.language || 'en';
+    const code    = lang.split(/[-_]/)[0].toLowerCase();
+    const isRTL   = RTL_LANGS.has(code);
+    const bsCss   = document.getElementById('bootstrap-css');
+    const htmlEl  = document.documentElement;
+
+    if (isRTL && htmlEl.dir !== 'rtl') {
+      htmlEl.dir      = 'rtl';
+      bsCss.href      = BOOTSTRAP_RTL;
+    } else if (!isRTL && htmlEl.dir !== 'ltr') {
+      htmlEl.dir      = 'ltr';
+      bsCss.href      = BOOTSTRAP_LTR;
+    }
+  }
+
+  // Run once on load
+  applyDirectionality();
+
+  // Watch for Google Translate or any other lang attribute mutations
+  new MutationObserver(mutations => {
+    if (mutations.some(m => m.attributeName === 'lang')) applyDirectionality();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
   </script>
 
 </body>
